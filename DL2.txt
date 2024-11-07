@@ -1,0 +1,74 @@
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+import random
+from tensorflow import keras
+
+# Print TensorFlow version
+print(tf.__version__)
+
+# Load MNIST dataset
+mnist = tf.keras.datasets.mnist
+
+# Split dataset into training and testing sets
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+# Normalize pixel values to be between 0 and 1 by dividing by 255
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+
+# Check the shape of the training and testing data
+print(x_train.shape)
+print(x_test.shape)
+
+# Define the model architecture
+model = keras.Sequential([
+    keras.layers.Flatten(input_shape=(28, 28)),  # Flatten the 28x28 images into 1D array of 784 pixels
+    keras.layers.Dense(128, activation="relu"),  # Dense layer with 128 neurons and ReLU activation function
+    keras.layers.Dense(10, activation="softmax")  # Output layer with 10 neurons (one for each class), softmax for classification
+])
+
+# Print the model summary to see the details
+model.summary()
+
+# Compile the model with stochastic gradient descent (sgd) optimizer and sparse categorical cross-entropy loss
+model.compile(optimizer="sgd", loss="sparse_categorical_crossentropy", metrics=['accuracy'])
+
+# Train the model for 10 epochs, using the training data and validating on the test data
+history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10)
+
+# Evaluate the model performance on the test data
+test_loss, test_acc = model.evaluate(x_test, y_test)
+
+# Print the loss and accuracy on the test data
+print("Loss=%.3f" % test_loss)
+print("Accuracy=%.3f" % test_acc)
+
+# Select a random test image and display it
+n = random.randint(0, len(x_test) - 1)
+plt.imshow(x_test[n], cmap='gray')
+plt.show()
+
+# Make a prediction on the selected test image
+predicted_value = model.predict(x_test[n].reshape(1, 28, 28))
+
+# Print the predicted value (class)
+print("Predicted value:", predicted_value.argmax())
+
+# Plot the training and validation accuracy over epochs
+plt.plot(history.history['accuracy'])  # Training accuracy
+plt.plot(history.history['val_accuracy'])  # Validation accuracy
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+plt.show()
+
+# Plot the training and validation loss over epochs
+plt.plot(history.history['loss'])  # Training loss
+plt.plot(history.history['val_loss'])  # Validation loss
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+plt.show()
